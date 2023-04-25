@@ -173,3 +173,59 @@ func ComputePoseidonHash(api frontend.API, cfg *PoseidonCfg, inputs []frontend.V
 	}
 	return out[0], nil
 }
+
+func Sigma(api frontend.API, in frontend.Variable) frontend.Variable {
+	return api.Mul(in, in, in, in, in)
+}
+
+func Ark(api frontend.API, in []frontend.Variable, c []*big.Int, r int) []frontend.Variable {
+	out := make([]frontend.Variable, len(in))
+	for i := 0; i < len(in); i++ {
+		out[i] = api.Add(in[i], c[i+r])
+	}
+	return out
+}
+
+func Mix(api frontend.API, in []frontend.Variable, m [][]*big.Int) []frontend.Variable {
+	out := make([]frontend.Variable, len(in))
+	for i := 0; i < len(in); i++ {
+		column := getColumn(m, i)
+		out[i] = computeLinearCombination(api, in, column)
+	}
+	return out
+}
+
+func getColumn(matrix [][]*big.Int, columnIndex int) []*big.Int {
+	column := make([]*big.Int, len(matrix))
+	for i := 0; i < len(matrix); i++ {
+		column[i] = matrix[i][columnIndex]
+	}
+	return column
+}
+
+func computeLinearCombination(api frontend.API, in []frontend.Variable, coeffs []*big.Int, offset ...int) frontend.Variable {
+	lc := frontend.Variable(0)
+	off := 0
+	if len(offset) > 0 {
+		off = offset[0]
+	}
+	for i := 0; i < len(in); i++ {
+		lc = api.Add(lc, api.Mul(coeffs[off+i], in[i]))
+	}
+	return lc
+}
+
+func MixLast(api frontend.API, in []frontend.Variable, m [][]*big.Int, s int) frontend.Variable {
+	column := getColumn(m, s)
+	return computeLinearCombination(api, in, column)
+}
+
+func MixS(api frontend.API, in []frontend.Variable, s []*big.Int, r int) []frontend.Variable {
+	out := make([]frontend.Variable, len(in))
+	out[0] = computeLinearCombination(api, in, s, (len(in)*2-1)*r)
+	scaleFactor := api.Mul(in[0], s[(len(in)*2-1)*r+len(in)-1])
+	for i := 1; i < len(in); i++ {
+		out[i] = api.Add(in[i], scaleFactor)
+	}
+	return out
+}
