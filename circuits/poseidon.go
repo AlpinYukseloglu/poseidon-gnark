@@ -89,12 +89,9 @@ func PoseidonEx(api frontend.API, inputs []frontend.Variable, initialState front
 	p := POSEIDON_P(len(inputs) + 1)
 
 	state := make([]frontend.Variable, len(inputs)+1)
-	for j := 0; j < len(inputs)+1; j++ {
-		if j == 0 {
-			state[0] = initialState
-		} else {
-			state[j] = inputs[j-1]
-		}
+	state[0] = initialState
+	for j := 1; j < len(inputs)+1; j++ {
+		state[j] = inputs[j-1]
 	}
 	state = Ark(api, state, c, 0)
 
