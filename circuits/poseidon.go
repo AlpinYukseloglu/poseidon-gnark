@@ -6,6 +6,19 @@ import (
 	"github.com/consensys/gnark/frontend"
 )
 
+type PoseidonCircuit struct {
+	PreImage [3]frontend.Variable `gnark:",public"`
+	Hash     frontend.Variable    `gnark:",public"`
+}
+
+func (t *PoseidonCircuit) Define(api frontend.API) error {
+	hash := Poseidon(api, t.PreImage[:])
+	api.Println(t.Hash)
+	api.Println(hash)
+	api.AssertIsEqual(hash, t.Hash)
+	return nil
+}
+
 func Sigma(api frontend.API, in frontend.Variable) frontend.Variable {
 	return api.Mul(in, in, in, in, in)
 }
