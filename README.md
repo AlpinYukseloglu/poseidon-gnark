@@ -11,8 +11,8 @@ The Poseidon hash function is a cryptographic primitive designed for efficient c
 To install the necessary dependencies, you can clone this repository and use the Go package manager:
 
 ```shell
-git clone https://github.com/yourgithubuser/yourrepository.git
-cd yourrepository
+git clone https://github.com/AlpinYukseloglu/poseidon-gnark
+cd poseidon-gnark
 go get
 ```
 
